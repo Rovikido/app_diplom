@@ -191,16 +191,20 @@ npm run dev
 ## 📷 Приклади / скриншоти
 
 - Діаграма проекту
-![Diagram](./screenshots/diagram_main.png)
+Diagram
+[./screenshots/diagram_main.png]
 
 - Додавання моделі
-![Models View](./screenshots/model_creation.png)
+Models View
+[./screenshots/model_creation.png]
 
 - Створення пресету
-![Create Preset](./screenshots/preset_creation.png)
+Create Preset
+[./screenshots/preset_creation.png]
 
 - Інтерфейс чату
-![Chat Interface](./screenshots/model_dialog.png)
+Chat Interface
+[./screenshots/model_dialog.png]
 
 
 ---
