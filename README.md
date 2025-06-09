@@ -1,60 +1,85 @@
-# Local LLM Launcher
+# 📘 Local LLM Launcher
 
-## Overview
-
-**Local LLM Launcher** is an application that allows users to run large language models (LLMs) locally without relying on cloud services. Its primary goal is to automate software development tasks such as code generation, test creation, and vulnerability detection. The app lets users download models from Hugging Face, store them locally, and create/use presets to tailor model behavior for specific tasks.
+> *Вебзастосунок для локального запуску великих мовних моделей з підтримкою пресетів, автономною генерацією відповідей та інтерфейсом чату.*
 
 ---
 
-## Features
+## 👤 Автор
 
-* Download LLMs directly from Hugging Face
-* Local model storage and reuse
-* Preset system with full customization support
-* Web interface for chatting with models
-* REST API and WebSocket support
-* Fully offline, private and secure
+* **ПІБ**: Закала Олександр
+* **Група**: ФеП-41
+* **Керівник**: Грабовський Володимир, доцент, к. ф.-м. н.
+* **Дата виконання**: \[01.06.2025]
 
 ---
 
-## Architecture
+## 📌 Загальна інформація
 
-* **Backend**: Python, FastAPI, SQLAlchemy, Hugging Face Transformers
-* **Frontend**: React + Tailwind CSS
-* **Model storage**: `./local_models`
-* **Database**: SQLite (configurable)
-* **Model interaction**: WebSocket streaming
+* **Тип проєкту**: Вебзастосунок
+* **Мова програмування**: Python + JavaScript
+* **Фреймворки / Бібліотеки**: FastAPI, React, Tailwind CSS, Hugging Face Transformers
 
 ---
 
-## Getting Started
+## 🧠 Опис функціоналу
 
-### 1. Backend setup
+* ⬇️ Завантаження моделей з Hugging Face
+* 💾 Локальне збереження моделей
+* 🧩 Налаштовувані пресети з параметрами генерації
+* 💬 Потокова генерація через WebSocket
+* 🌐 REST API для управління моделями та пресетами
+* 🛰️ Паралельна підтримка `remote_backend`
 
-#### Install dependencies:
+---
+
+## 🧱 Опис основних класів / файлів
+
+| Клас / Файл              | Призначення                       |
+| ------------------------ | --------------------------------- |
+| `model_storage.py`       | Завантаження та кешування моделей |
+| `model_runtime.py`       | Запуск моделі з обраним пресетом  |
+| `inference.py`           | API для запуску генерації         |
+| `presets.py`             | REST API для пресетів             |
+| `remote_backend/main.py` | Опціональний дублюючий бекенд     |
+| `PresetChat.jsx`         | UI-чат з LLM                      |
+| `PresetsMain.jsx`        | Менеджер пресетів                 |
+| `CreateModelWindow.jsx`  | Форма створення моделі            |
+
+---
+
+## ▶️ Як запустити проєкт "з нуля"
+
+### 1. Встановлення інструментів
+
+* Python 3.10+
+* Node.js v18+ + npm
+
+### 2. Клонування репозиторію
 
 ```bash
-cd backend
+git clone https://github.com/Rovikido/app_diplom.git
+cd local-llm-launcher
+```
+
+### 3. Встановлення залежностей
+
+```bash
+# Спільне середовище для backend та remote_backend
 python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
+venv\Scripts\activate  # Windows
+pip install -r backend/requirements.txt
 ```
 
-#### Run the server:
+### 4. Запуск
 
 ```bash
-cd backend
-uvicorn app.main:app --port 8000
-```
+# Основний бекенд
+uvicorn backend.app.main:app --port 8000
 
-```bash
-cd remote_backend
-uvicorn main:app --port 8001
-```
+# Remote backend (опціонально)
+uvicorn remote_backend.main:app --port 8001
 
-### 2. Frontend setup
-
-```bash
+# Frontend
 cd frontend
 npm install
 npm run dev
@@ -62,32 +87,138 @@ npm run dev
 
 ---
 
-## How It Works
+## 🔌 API приклади
 
-1. User creates a **model** by providing a name and a Hugging Face repo link.
-2. The model is downloaded and stored locally via `model_storage.py`.
-3. Users create **presets** — saved configurations for tasks like code generation or analysis.
-4. A preset is loaded, and the model is initialized using `model_runtime.py`.
-5. Messages are sent via WebSocket and the model responds in a streaming fashion.
-6. The UI updates in real-time using the React frontend.
+### 📥 Завантажити модель та пресет
+
+**POST /inference/load/{preset\_id}**
+
+```json
+{
+  "status": "loaded",
+  "model": { ... },
+  "preset": { ... }
+}
+```
 
 ---
 
-## Example Workflow
+### 💬 Генерація (WebSocket)
 
-1. Create a model:
+**WS /inference/ws**
 
-   * Name: anything
-   * Reference to hugginface: e.g., `meta-llama/Llama-2-7b-hf`
+Передає текст → отримує стрім відповідей.
 
-2. Create a preset:
+---
 
-   * Choose model
-   * Define `task` and `constraints`
-   * Tune generation parameters like `temperature`, `top_p`, etc. (OPTIONAL)
+### 📋 Отримати список моделей
 
-3. Start a chat using the selected preset.
+**GET /models**
 
-4. Upload a model.
+```json
+[
+  {
+    "id": 1,
+    "model_name": "Llama-2",
+    "huggin_face_refference": "meta-llama/Llama-2-7b",
+    "size": "4.3 GB"
+  },
+  ...
+]
+```
+
+---
+
+### 📋 Отримати список пресетів
+
+**GET /presets**
+
+```json
+[
+  {
+    "id": 5,
+    "public_name": "Code Assistant",
+    "model_id": 1,
+    "temperature": 1.2,
+    ...
+  }
+]
+```
+
+---
+
+### ➕ Створити новий пресет
+
+**POST /presets**
+
+```json
+{
+  "public_name": "Analyzer",
+  "bot_name": "Bot",
+  "task": "Review code quality.",
+  "costraints": "Short answers only.",
+  "model_id": 2,
+  "temperature": 1.0,
+  "repetition_penalty": 1.2,
+  "top_p": 0.9,
+  "top_k": 40
+}
+```
+
+---
+
+### 🗑️ Видалити пресет
+
+**DELETE /presets/{id}**
+
+```json
+{
+  "ok": true
+}
+```
+
+---
+
+## 🖱️ Інструкція для користувача
+
+1. **Models** — додайте модель з Hugging Face
+2. **Presets** — створіть налаштований шаблон
+3. **Chat** — оберіть пресет і починайте взаємодію
+4. **Remote backend** — за потреби запустіть на іншому порту
+
+---
+
+## 📷 Приклади / скриншоти
+
+- Діаграма проекту
+![Diagram](./screenshots/diagram_main.png)
+
+- Додавання моделі
+![Models View](./screenshots/model_creation.png)
+
+- Створення пресету
+![Create Preset](./screenshots/preset_creation.png)
+
+- Інтерфейс чату
+![Chat Interface](./screenshots/model_dialog.png)
 
 
+---
+
+## 🧪 Проблеми і рішення
+
+| Проблема                  | Рішення                                      |
+| ------------------------- | -------------------------------------------- |
+| Модель не знаходиться     | Перевірити назву з Hugging Face              |
+| WebSocket не працює       | Перевірити, чи бекенд активний на порту 8000 |
+| Remote backend (вкладка Community) неактивний | Запустити `uvicorn remote_backend.main:app --port 8001`  |
+
+---
+
+## 🧾 Використані джерела / література
+
+* FastAPI документація
+* Hugging Face Transformers
+* React документація
+* WebSocket RFC6455
+* SQLAlchemy + Pydantic
