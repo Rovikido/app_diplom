@@ -58,7 +58,7 @@
 
 ```bash
 git clone https://github.com/Rovikido/app_diplom.git
-cd local-llm-launcher
+cd app_diplom
 ```
 
 ### 3. Встановлення залежностей
